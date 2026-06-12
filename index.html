@@ -936,8 +936,8 @@
       patternStart,
       patternLength
     }) {
-      const contextStart = Math.max(0, patternStart - 5);
-      const contextEnd = Math.min(cellValue.length, patternStart + patternLength + 5);
+      const contextStart = Math.max(0, patternStart - 10);
+      const contextEnd = Math.min(cellValue.length, patternStart + patternLength + 10);
       const originalContext = cellValue.slice(contextStart, contextEnd);
 
       const defaultValue = autoReplace
@@ -1039,7 +1039,7 @@
       if (overlapCount > 0) {
         els.overlapBox.style.display = "block";
         els.overlapBox.innerHTML = `
-          <strong>前後5文字の抽出範囲が重なっている箇所があります。</strong><br>
+          <strong>前後10文字の抽出範囲が重なっている箇所があります。</strong><br>
           重複範囲は黄色で表示しています。編集値の反映は同じセル内で後ろの位置から順に行います。
         `;
       } else {
