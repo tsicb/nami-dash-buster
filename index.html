@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSV ? 置換チェックツール</title>
+
+  <!-- CSV parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+
+  <!-- Japanese encoding detector/converter -->
+  <script src="https://cdn.jsdelivr.net/npm/encoding-japanese@2.2.0/encoding.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d9dee8;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --danger: #b45309;
+      --danger-bg: #fff7ed;
+      --ok-bg: #ecfdf5;
+      --ok: #047857;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 28px 20px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .upload-box {
+      border: 2px dashed #b6c2d5;
+      border-radius: var(--radius);
+      padding: 36px 20px;
+      text-align: center;
+      background: #fff;
+    }
+
+    .upload-box h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .upload-box p {
+      color: var(--muted);
+      margin: 0 0 20px;
+    }
+
+    input[type="file"] {
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    button.secondary:hover {
+      background: #d1d5db;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .stat .value {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .notice {
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    .notice.warn {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fed7aa;
+    }
+
+    .notice.ok {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border: 1px solid #a7f3d0;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .finding {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .finding.overlap {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.gray {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .badge.warn {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .original {
+      margin: 8px 0 10px;
+      padding: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+    }
+
+    mark {
+      background: #fde68a;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 56px;
+      resize: vertical;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      font: inherit;
+      line-height: 1.5;
+      background: #fff;
+    }
+
+    textarea:focus {
+      outline: 3px solid rgba(37, 99, 235, 0.18);
+      border-color: var(--accent);
+    }
+
+    .empty {
+      color: var(--muted);
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .download-area {
+      position: sticky;
+      bottom: 0;
+      background: rgba(245, 247, 251, 0.95);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--line);
+      padding: 14px 0 0;
+      margin-top: 24px;
+    }
+
+    .download-inner {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    details {
+      margin-top: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    ul {
+      margin-top: 8px;
+    }
+
+    @media (max-width: 760px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      header h1 {
+        font-size: 21px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CSV ? 置換チェックツール</h1>
+    <p>対象列内の「?＋数字」と「?＋数字以外」を検出し、編集値を反映したCSVを出力します。</p>
+  </header>
+
+  <main>
+    <section id="uploadScreen" class="screen active">
+      <div class="panel upload-box">
+        <h2>CSVファイルをアップロード</h2>
+        <p>UTF-8 / Shift-JIS のCSVに対応しています。処理はブラウザ内だけで行います。</p>
+        <input id="fileInput" type="file" accept=".csv,text/csv" />
+        <div id="uploadError" class="notice warn" style="display: none;"></div>
+      </div>
+    </section>
+
+    <section id="editorScreen" class="screen">
+      <div class="panel">
+        <div class="toolbar">
+          <div>
+            <strong id="fileNameLabel">CSVファイル</strong>
+            <div class="small" id="encodingLabel"></div>
+          </div>
+          <button type="button" class="secondary" id="resetButton">別のCSVを読み込む</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="label">CSV行数</div>
+            <div class="value" id="rowCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">存在した対象列</div>
+            <div class="value" id="foundHeaderCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">数字あり検出</div>
+            <div class="value" id="digitCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">数字なし検出</div>
+            <div class="value" id="otherCount">0</div>
+          </div>
+        </div>
+
+        <div id="missingHeadersBox" class="notice warn" style="display: none;"></div>
+        <div id="overlapBox" class="notice warn" style="display: none;"></div>
+        <div id="noHitBox" class="notice ok" style="display: none;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <h2>数字ありリスト</h2>
+          <span>正規表現：<code>\?[0-9０-９]</code></span>
+        </div>
+        <div id="digitList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <h2>数字なしリスト</h2>
+          <span>条件：<code>?</code> の次が数字ではない、またはセル末尾の <code>?</code></span>
+        </div>
+        <div id="otherList"></div>
+      </div>
+
+      <div class="download-area">
+        <div class="download-inner">
+          <div>
+            <strong>編集内容を反映してCSVを出力</strong>
+            <div class="small">出力文字コード：UTF-8 with BOM / 元の列順・加工対象外列は保持</div>
+          </div>
+          <button type="button" id="downloadButton">CSVをダウンロード</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const TARGET_HEADERS = [
+      "仕事番号",
+      "雇用形態備考",
+      "仕事名",
+      "キャッチコピー",
+      "インフォメーション",
+      "仕事内容",
+      "勤務時間",
+      "休日・休暇",
+      "給与備考",
+      "月収例",
+      "年収例",
+      "待遇・福利厚生",
+      "応募資格",
+      "選考手順",
+      "面接地住所",
+      "アピールポイント",
+      "醍醐味",
+      "厳しさ",
+      "こんな人が活躍",
+      "募集背景",
+      "主担当者名",
+      "副担当者名",
+      "勤務場所名1",
+      "勤務地住所1",
+      "交通1",
+      "勤務場所名2",
+      "勤務地住所2",
+      "交通2",
+      "勤務場所名3",
+      "勤務地住所3",
+      "交通3",
+      "勤務場所名その他",
+      "勤務地住所その他",
+      "交通その他",
+      "メイン画像データファイルタイトル",
+      "メイン画像説明文",
+      "サブ画像1データファイルタイトル",
+      "サブ画像1説明文",
+      "サブ画像2データファイルタイトル",
+      "サブ画像2説明文",
+      "サブ画像3データファイルタイトル",
+      "サブ画像3説明文",
+      "備考",
+      "項目1",
+      "項目2",
+      "項目3",
+      "項目4",
+      "項目5",
+      "項目6",
+      "項目7",
+      "グループ",
+      "動画タイトル",
+      "動画説明文",
+      "Indeed用求人タイトル",
+      "その他条件(試用期間)",
+      "紹介先企業名"
+    ];
+
+    const state = {
+      fileName: "",
+      detectedEncoding: "",
+      rows: [],
+      header: [],
+      targetColumns: [],
+      missingHeaders: [],
+      findings: []
+    };
+
+    const els = {
+      uploadScreen: document.getElementById("uploadScreen"),
+      editorScreen: document.getElementById("editorScreen"),
+      fileInput: document.getElementById("fileInput"),
+      uploadError: document.getElementById("uploadError"),
+      resetButton: document.getElementById("resetButton"),
+      fileNameLabel: document.getElementById("fileNameLabel"),
+      encodingLabel: document.getElementById("encodingLabel"),
+      rowCount: document.getElementById("rowCount"),
+      foundHeaderCount: document.getElementById("foundHeaderCount"),
+      digitCount: document.getElementById("digitCount"),
+      otherCount: document.getElementById("otherCount"),
+      missingHeadersBox: document.getElementById("missingHeadersBox"),
+      overlapBox: document.getElementById("overlapBox"),
+      noHitBox: document.getElementById("noHitBox"),
+      digitList: document.getElementById("digitList"),
+      otherList: document.getElementById("otherList"),
+      downloadButton: document.getElementById("downloadButton")
+    };
+
+    els.fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      try {
+        hideUploadError();
+        await loadCsvFile(file);
+      } catch (error) {
+        console.error(error);
+        showUploadError(error.message || "CSVの読み込み中にエラーが発生しました。");
+      }
+    });
+
+    els.resetButton.addEventListener("click", () => {
+      resetApp();
+    });
+
+    els.downloadButton.addEventListener("click", () => {
+      downloadEditedCsv();
+    });
+
+    async function loadCsvFile(file) {
+      state.fileName = file.name;
+
+      const buffer = await file.arrayBuffer();
+      const decoded = decodeCsvText(buffer);
+
+      state.detectedEncoding = decoded.encoding;
+      const csvText = decoded.text.replace(/^\uFEFF/, "");
+
+      const parsed = Papa.parse(csvText, {
+        header: false,
+        skipEmptyLines: false,
+        dynamicTyping: false
+      });
+
+      if (parsed.errors && parsed.errors.length > 0) {
+        console.warn("Papa Parse warnings/errors:", parsed.errors);
+      }
+
+      const rows = parsed.data;
+
+      if (!rows || rows.length === 0 || !Array.isArray(rows[0])) {
+        throw new Error("CSVを読み込めませんでした。1行目にヘッダーがあるCSVか確認してください。");
+      }
+
+      state.rows = normalizeRows(rows);
+      state.header = state.rows[0].map((value, index) => {
+        const text = value == null ? "" : String(value);
+        return index === 0 ? text.replace(/^\uFEFF/, "") : text;
+      });
+      state.rows[0] = state.header.slice();
+
+      buildTargetColumns();
+      buildFindings();
+      renderEditor();
+      switchScreen("editor");
+    }
+
+    function decodeCsvText(arrayBuffer) {
+      const bytes = new Uint8Array(arrayBuffer);
+      const byteArray = Array.from(bytes);
+
+      let detected = Encoding.detect(byteArray);
+      if (!detected) {
+        detected = "UTF8";
+      }
+
+      const text = Encoding.convert(byteArray, {
+        to: "UNICODE",
+        from: detected,
+        type: "string"
+      });
+
+      return {
+        text,
+        encoding: detected
+      };
+    }
+
+    function normalizeRows(rows) {
+      return rows.map((row) => {
+        if (!Array.isArray(row)) return [String(row ?? "")];
+        return row.map((cell) => cell == null ? "" : String(cell));
+      });
+    }
+
+    function buildTargetColumns() {
+      const headerIndexMap = new Map();
+      state.header.forEach((name, index) => {
+        if (!headerIndexMap.has(name)) {
+          headerIndexMap.set(name, index);
+        }
+      });
+
+      state.targetColumns = [];
+      state.missingHeaders = [];
+
+      TARGET_HEADERS.forEach((name) => {
+        if (headerIndexMap.has(name)) {
+          state.targetColumns.push({
+            name,
+            index: headerIndexMap.get(name)
+          });
+        } else {
+          state.missingHeaders.push(name);
+        }
+      });
+    }
+
+    function buildFindings() {
+      const findings = [];
+      const jobNumberCol = state.header.indexOf("仕事番号");
+      let idCounter = 1;
+
+      for (let rowIndex = 1; rowIndex < state.rows.length; rowIndex++) {
+        const row = state.rows[rowIndex];
+        const jobNumber = jobNumberCol >= 0 ? String(row[jobNumberCol] ?? "") : "";
+
+        state.targetColumns.forEach((col) => {
+          const value = String(row[col.index] ?? "");
+          if (!value.includes("?")) return;
+
+          const digitMatches = collectMatches(value, /\?[0-9０-９]/g, 2);
+          const otherMatches = collectMatches(value, /\?(?![0-9０-９])/g, 1);
+
+          digitMatches.forEach((match) => {
+            findings.push(createFinding({
+              id: idCounter++,
+              type: "digit",
+              typeLabel: "数字あり",
+              rowIndex,
+              colIndex: col.index,
+              colName: col.name,
+              jobNumber,
+              cellValue: value,
+              matchIndex: match.index,
+              matchLength: match.length
+            }));
+          });
+
+          otherMatches.forEach((match) => {
+            findings.push(createFinding({
+              id: idCounter++,
+              type: "other",
+              typeLabel: "数字なし",
+              rowIndex,
+              colIndex: col.index,
+              colName: col.name,
+              jobNumber,
+              cellValue: value,
+              matchIndex: match.index,
+              matchLength: match.length
+            }));
+          });
+        });
+      }
+
+      markOverlaps(findings);
+      state.findings = findings;
+    }
+
+    function collectMatches(value, regex, fallbackLength) {
+      const matches = [];
+      regex.lastIndex = 0;
+
+      let match;
+      while ((match = regex.exec(value)) !== null) {
+        matches.push({
+          index: match.index,
+          length: match[0] ? match[0].length : fallbackLength
+        });
+
+        if (match.index === regex.lastIndex) {
+          regex.lastIndex++;
+        }
+      }
+
+      return matches;
+    }
+
+    function createFinding({
+      id,
+      type,
+      typeLabel,
+      rowIndex,
+      colIndex,
+      colName,
+      jobNumber,
+      cellValue,
+      matchIndex,
+      matchLength
+    }) {
+      const contextStart = Math.max(0, matchIndex - 5);
+      const contextEnd = Math.min(cellValue.length, matchIndex + matchLength + 5);
+      const originalContext = cellValue.slice(contextStart, contextEnd);
+
+      return {
+        id,
+        type,
+        typeLabel,
+        rowIndex,
+        csvRowNumber: rowIndex + 1,
+        colIndex,
+        colName,
+        jobNumber,
+        matchIndex,
+        matchLength,
+        contextStart,
+        contextEnd,
+        originalContext,
+        defaultValue: type === "digit"
+          ? originalContext.replace(/\?/g, "～")
+          : originalContext,
+        overlap: false
+      };
+    }
+
+    function markOverlaps(findings) {
+      const byCell = new Map();
+
+      findings.forEach((finding) => {
+        const key = `${finding.rowIndex}:${finding.colIndex}`;
+        if (!byCell.has(key)) byCell.set(key, []);
+        byCell.get(key).push(finding);
+      });
+
+      byCell.forEach((items) => {
+        items.sort((a, b) => a.contextStart - b.contextStart || a.contextEnd - b.contextEnd);
+
+        for (let i = 1; i < items.length; i++) {
+          const prev = items[i - 1];
+          const current = items[i];
+
+          if (current.contextStart < prev.contextEnd) {
+            prev.overlap = true;
+            current.overlap = true;
+          }
+        }
+      });
+    }
+
+    function renderEditor() {
+      const digitFindings = state.findings.filter((item) => item.type === "digit");
+      const otherFindings = state.findings.filter((item) => item.type === "other");
+      const overlapCount = state.findings.filter((item) => item.overlap).length;
+
+      els.fileNameLabel.textContent = state.fileName;
+      els.encodingLabel.textContent = `検出文字コード：${state.detectedEncoding}`;
+      els.rowCount.textContent = String(Math.max(0, state.rows.length - 1));
+      els.foundHeaderCount.textContent = String(state.targetColumns.length);
+      els.digitCount.textContent = String(digitFindings.length);
+      els.otherCount.textContent = String(otherFindings.length);
+
+      if (state.missingHeaders.length > 0) {
+        els.missingHeadersBox.style.display = "block";
+        els.missingHeadersBox.innerHTML = `
+          <strong>存在しない対象列があります。</strong><br>
+          存在した対象列のみ処理しました。
+          <details>
+            <summary>存在しなかった列を表示</summary>
+            <ul>${state.missingHeaders.map((name) => `<li>${escapeHtml(name)}</li>`).join("")}</ul>
+          </details>
+        `;
+      } else {
+        els.missingHeadersBox.style.display = "none";
+      }
+
+      if (overlapCount > 0) {
+        els.overlapBox.style.display = "block";
+        els.overlapBox.innerHTML = `
+          <strong>前後5文字の抽出範囲が重なっている箇所があります。</strong><br>
+          重複範囲は黄色で表示しています。編集値の反映は同じセル内で後ろの位置から順に行います。
+        `;
+      } else {
+        els.overlapBox.style.display = "none";
+      }
+
+      if (state.findings.length === 0) {
+        els.noHitBox.style.display = "block";
+        els.noHitBox.textContent = "対象列内に半角 ? の検出箇所はありませんでした。このままCSV出力しても内容は変更されません。";
+      } else {
+        els.noHitBox.style.display = "none";
+      }
+
+      renderFindingList(els.digitList, digitFindings);
+      renderFindingList(els.otherList, otherFindings);
+    }
+
+    function renderFindingList(container, findings) {
+      container.innerHTML = "";
+
+      if (findings.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "検出なし";
+        container.appendChild(empty);
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      findings.forEach((finding) => {
+        const card = document.createElement("div");
+        card.className = finding.overlap ? "finding overlap" : "finding";
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        meta.appendChild(createBadge(finding.typeLabel));
+        meta.appendChild(createBadge(`CSV ${finding.csvRowNumber}行目`, "gray"));
+
+        if (finding.jobNumber) {
+          meta.appendChild(createBadge(`仕事番号：${finding.jobNumber}`, "gray"));
+        }
+
+        meta.appendChild(createBadge(`列：${finding.colName}`, "gray"));
+
+        if (finding.overlap) {
+          meta.appendChild(createBadge("抽出範囲重複", "warn"));
+        }
+
+        const original = document.createElement("div");
+        original.className = "original";
+        original.innerHTML = buildHighlightedContext(finding);
+
+        const textarea = document.createElement("textarea");
+        textarea.id = `edit-${finding.id}`;
+        textarea.value = finding.defaultValue;
+        textarea.dataset.findingId = String(finding.id);
+        textarea.rows = Math.max(2, finding.defaultValue.split(/\r\n|\r|\n/).length + 1);
+
+        card.appendChild(meta);
+
+        const labelOriginal = document.createElement("div");
+        labelOriginal.className = "small";
+        labelOriginal.textContent = "元の抜き出し文字列";
+        card.appendChild(labelOriginal);
+        card.appendChild(original);
+
+        const labelEdit = document.createElement("div");
+        labelEdit.className = "small";
+        labelEdit.textContent = "CSVへ戻す編集後の値";
+        card.appendChild(labelEdit);
+        card.appendChild(textarea);
+
+        fragment.appendChild(card);
+      });
+
+      container.appendChild(fragment);
+    }
+
+    function createBadge(text, kind = "") {
+      const span = document.createElement("span");
+      span.className = kind ? `badge ${kind}` : "badge";
+      span.textContent = text;
+      return span;
+    }
+
+    function buildHighlightedContext(finding) {
+      const relStart = finding.matchIndex - finding.contextStart;
+      const relEnd = relStart + finding.matchLength;
+
+      const before = finding.originalContext.slice(0, relStart);
+      const matched = finding.originalContext.slice(relStart, relEnd);
+      const after = finding.originalContext.slice(relEnd);
+
+      return `${escapeHtml(before)}<mark>${escapeHtml(matched)}</mark>${escapeHtml(after)}`;
+    }
+
+    function downloadEditedCsv() {
+      const outputRows = state.rows.map((row) => row.slice());
+      const byCell = new Map();
+
+      state.findings.forEach((finding) => {
+        const textarea = document.getElementById(`edit-${finding.id}`);
+        const editedValue = textarea ? textarea.value : finding.defaultValue;
+
+        const key = `${finding.rowIndex}:${finding.colIndex}`;
+        if (!byCell.has(key)) byCell.set(key, []);
+        byCell.get(key).push({
+          ...finding,
+          editedValue
+        });
+      });
+
+      byCell.forEach((items, key) => {
+        items.sort((a, b) => {
+          if (b.contextStart !== a.contextStart) {
+            return b.contextStart - a.contextStart;
+          }
+          return b.contextEnd - a.contextEnd;
+        });
+
+        const [rowIndexText, colIndexText] = key.split(":");
+        const rowIndex = Number(rowIndexText);
+        const colIndex = Number(colIndexText);
+
+        let cellValue = String(outputRows[rowIndex][colIndex] ?? "");
+
+        items.forEach((item) => {
+          cellValue =
+            cellValue.slice(0, item.contextStart) +
+            item.editedValue +
+            cellValue.slice(item.contextEnd);
+        });
+
+        outputRows[rowIndex][colIndex] = cellValue;
+      });
+
+      const csv = Papa.unparse(outputRows, {
+        quotes: false,
+        delimiter: ",",
+        newline: "\r\n",
+        skipEmptyLines: false
+      });
+
+      const blob = new Blob(["\uFEFF", csv], {
+        type: "text/csv;charset=utf-8;"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = buildOutputFileName(state.fileName);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildOutputFileName(originalName) {
+      const base = originalName.replace(/\.csv$/i, "");
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+
+      return `${base}_fixed_${yyyy}${mm}${dd}_${hh}${mi}${ss}.csv`;
+    }
+
+    function switchScreen(screenName) {
+      els.uploadScreen.classList.toggle("active", screenName === "upload");
+      els.editorScreen.classList.toggle("active", screenName === "editor");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetApp() {
+      state.fileName = "";
+      state.detectedEncoding = "";
+      state.rows = [];
+      state.header = [];
+      state.targetColumns = [];
+      state.missingHeaders = [];
+      state.findings = [];
+
+      els.fileInput.value = "";
+      hideUploadError();
+      switchScreen("upload");
+    }
+
+    function showUploadError(message) {
+      els.uploadError.textContent = message;
+      els.uploadError.style.display = "block";
+    }
+
+    function hideUploadError() {
+      els.uploadError.textContent = "";
+      els.uploadError.style.display = "none";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
