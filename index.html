@@ -143,7 +143,7 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 12px;
       margin-top: 16px;
     }
@@ -191,6 +191,7 @@
       justify-content: space-between;
       gap: 12px;
       margin: 0 0 12px;
+      flex-wrap: wrap;
     }
 
     .section-title h2 {
@@ -242,6 +243,11 @@
     .badge.warn {
       background: #ffedd5;
       color: #9a3412;
+    }
+
+    .badge.auto {
+      background: #dcfce7;
+      color: #166534;
     }
 
     .original {
@@ -330,6 +336,18 @@
       margin-top: 8px;
     }
 
+    code {
+      background: #f3f4f6;
+      border-radius: 6px;
+      padding: 2px 5px;
+    }
+
+    @media (max-width: 960px) {
+      .stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 760px) {
       .stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -350,7 +368,7 @@
 <body>
   <header>
     <h1>CSV ? 置換チェックツール</h1>
-    <p>対象列内の「?＋数字」と「?＋数字以外」を検出し、編集値を反映したCSVを出力します。</p>
+    <p>対象列内の半角 ? を3分類で検出し、編集値を反映したCSVを出力します。</p>
   </header>
 
   <main>
@@ -369,6 +387,7 @@
           <div>
             <strong id="fileNameLabel">CSVファイル</strong>
             <div class="small" id="encodingLabel"></div>
+            <div class="small" id="outputEncodingLabel"></div>
           </div>
           <button type="button" class="secondary" id="resetButton">別のCSVを読み込む</button>
         </div>
@@ -383,11 +402,15 @@
             <div class="value" id="foundHeaderCount">0</div>
           </div>
           <div class="stat">
-            <div class="label">数字あり検出</div>
+            <div class="label">?＋数字</div>
             <div class="value" id="digitCount">0</div>
           </div>
           <div class="stat">
-            <div class="label">数字なし検出</div>
+            <div class="label">円日月＋?</div>
+            <div class="value" id="yenDayMonthCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">その他?</div>
             <div class="value" id="otherCount">0</div>
           </div>
         </div>
@@ -399,16 +422,24 @@
 
       <div class="panel">
         <div class="section-title">
-          <h2>数字ありリスト</h2>
-          <span>正規表現：<code>\?[0-9０-９]</code></span>
+          <h2>1. ?＋数字リスト</h2>
+          <span>例：<code>?1</code> / <code>?３</code>　初期値では対象の <code>?</code> を <code>～</code> に置換</span>
         </div>
         <div id="digitList"></div>
       </div>
 
       <div class="panel">
         <div class="section-title">
-          <h2>数字なしリスト</h2>
-          <span>条件：<code>?</code> の次が数字ではない、またはセル末尾の <code>?</code></span>
+          <h2>2. 円・日・月＋? リスト</h2>
+          <span>例：<code>円?</code> / <code>日?</code> / <code>月?</code>　初期値では対象の <code>?</code> を <code>～</code> に置換</span>
+        </div>
+        <div id="yenDayMonthList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <h2>3. その他の?リスト</h2>
+          <span>上記以外の <code>?</code>　初期値では置換しません</span>
         </div>
         <div id="otherList"></div>
       </div>
@@ -417,7 +448,8 @@
         <div class="download-inner">
           <div>
             <strong>編集内容を反映してCSVを出力</strong>
-            <div class="small">出力文字コード：UTF-8 with BOM / 元の列順・加工対象外列は保持</div>
+            <div class="small" id="downloadEncodingText">出力文字コード：入力に応じて自動判定</div>
+            <div class="small">元の列順・加工対象外列は保持します。</div>
           </div>
           <button type="button" id="downloadButton">CSVをダウンロード</button>
         </div>
@@ -488,6 +520,9 @@
     const state = {
       fileName: "",
       detectedEncoding: "",
+      detectedEncodingLabel: "",
+      outputEncoding: "UTF8_BOM",
+      outputEncodingLabel: "UTF-8 with BOM",
       rows: [],
       header: [],
       targetColumns: [],
@@ -503,15 +538,19 @@
       resetButton: document.getElementById("resetButton"),
       fileNameLabel: document.getElementById("fileNameLabel"),
       encodingLabel: document.getElementById("encodingLabel"),
+      outputEncodingLabel: document.getElementById("outputEncodingLabel"),
       rowCount: document.getElementById("rowCount"),
       foundHeaderCount: document.getElementById("foundHeaderCount"),
       digitCount: document.getElementById("digitCount"),
+      yenDayMonthCount: document.getElementById("yenDayMonthCount"),
       otherCount: document.getElementById("otherCount"),
       missingHeadersBox: document.getElementById("missingHeadersBox"),
       overlapBox: document.getElementById("overlapBox"),
       noHitBox: document.getElementById("noHitBox"),
       digitList: document.getElementById("digitList"),
+      yenDayMonthList: document.getElementById("yenDayMonthList"),
       otherList: document.getElementById("otherList"),
+      downloadEncodingText: document.getElementById("downloadEncodingText"),
       downloadButton: document.getElementById("downloadButton")
     };
 
@@ -543,6 +582,10 @@
       const decoded = decodeCsvText(buffer);
 
       state.detectedEncoding = decoded.encoding;
+      state.detectedEncodingLabel = decoded.encodingLabel;
+      state.outputEncoding = decoded.outputEncoding;
+      state.outputEncodingLabel = decoded.outputEncodingLabel;
+
       const csvText = decoded.text.replace(/^\uFEFF/, "");
 
       const parsed = Papa.parse(csvText, {
@@ -583,6 +626,9 @@
         detected = "UTF8";
       }
 
+      const encodingLabel = getEncodingLabel(detected);
+      const outputInfo = getOutputEncodingInfo(detected);
+
       const text = Encoding.convert(byteArray, {
         to: "UNICODE",
         from: detected,
@@ -591,8 +637,51 @@
 
       return {
         text,
-        encoding: detected
+        encoding: detected,
+        encodingLabel,
+        outputEncoding: outputInfo.outputEncoding,
+        outputEncodingLabel: outputInfo.outputEncodingLabel
       };
+    }
+
+    function getEncodingLabel(encoding) {
+      const name = String(encoding || "").toUpperCase();
+
+      if (isShiftJisEncoding(name)) return "Shift-JIS";
+      if (name.includes("UTF")) return "UTF-8";
+      if (name.includes("EUC")) return "EUC-JP";
+      if (name.includes("UNICODE")) return "Unicode";
+
+      return String(encoding || "不明");
+    }
+
+    function getOutputEncodingInfo(inputEncoding) {
+      const name = String(inputEncoding || "").toUpperCase();
+
+      if (isShiftJisEncoding(name)) {
+        return {
+          outputEncoding: "SJIS",
+          outputEncodingLabel: "Shift-JIS"
+        };
+      }
+
+      return {
+        outputEncoding: "UTF8_BOM",
+        outputEncodingLabel: "UTF-8 with BOM"
+      };
+    }
+
+    function isShiftJisEncoding(encodingName) {
+      const name = String(encodingName || "").toUpperCase();
+
+      return (
+        name.includes("SJIS") ||
+        name.includes("SHIFT_JIS") ||
+        name.includes("SHIFT-JIS") ||
+        name.includes("CP932") ||
+        name.includes("MS932") ||
+        name.includes("WINDOWS-31J")
+      );
     }
 
     function normalizeRows(rows) {
@@ -604,6 +693,7 @@
 
     function buildTargetColumns() {
       const headerIndexMap = new Map();
+
       state.header.forEach((name, index) => {
         if (!headerIndexMap.has(name)) {
           headerIndexMap.set(name, index);
@@ -638,37 +728,17 @@
           const value = String(row[col.index] ?? "");
           if (!value.includes("?")) return;
 
-          const digitMatches = collectMatches(value, /\?[0-9０-９]/g, 2);
-          const otherMatches = collectMatches(value, /\?(?![0-9０-９])/g, 1);
-
-          digitMatches.forEach((match) => {
-            findings.push(createFinding({
-              id: idCounter++,
-              type: "digit",
-              typeLabel: "数字あり",
-              rowIndex,
-              colIndex: col.index,
-              colName: col.name,
-              jobNumber,
-              cellValue: value,
-              matchIndex: match.index,
-              matchLength: match.length
-            }));
+          const questionFindings = collectQuestionMarkFindings({
+            value,
+            rowIndex,
+            colIndex: col.index,
+            colName: col.name,
+            jobNumber
           });
 
-          otherMatches.forEach((match) => {
-            findings.push(createFinding({
-              id: idCounter++,
-              type: "other",
-              typeLabel: "数字なし",
-              rowIndex,
-              colIndex: col.index,
-              colName: col.name,
-              jobNumber,
-              cellValue: value,
-              matchIndex: match.index,
-              matchLength: match.length
-            }));
+          questionFindings.forEach((finding) => {
+            finding.id = idCounter++;
+            findings.push(finding);
           });
         });
       }
@@ -677,60 +747,138 @@
       state.findings = findings;
     }
 
-    function collectMatches(value, regex, fallbackLength) {
-      const matches = [];
-      regex.lastIndex = 0;
+    function collectQuestionMarkFindings({
+      value,
+      rowIndex,
+      colIndex,
+      colName,
+      jobNumber
+    }) {
+      const findings = [];
+      let searchFrom = 0;
 
-      let match;
-      while ((match = regex.exec(value)) !== null) {
-        matches.push({
-          index: match.index,
-          length: match[0] ? match[0].length : fallbackLength
-        });
+      while (true) {
+        const questionIndex = value.indexOf("?", searchFrom);
+        if (questionIndex === -1) break;
 
-        if (match.index === regex.lastIndex) {
-          regex.lastIndex++;
-        }
+        const classified = classifyQuestionMark(value, questionIndex);
+
+        findings.push(createFinding({
+          id: null,
+          type: classified.type,
+          typeLabel: classified.typeLabel,
+          autoReplace: classified.autoReplace,
+          rowIndex,
+          colIndex,
+          colName,
+          jobNumber,
+          cellValue: value,
+          questionIndex,
+          patternStart: classified.patternStart,
+          patternLength: classified.patternLength
+        }));
+
+        searchFrom = questionIndex + 1;
       }
 
-      return matches;
+      return findings;
+    }
+
+    function classifyQuestionMark(value, questionIndex) {
+      const nextChar = questionIndex + 1 < value.length
+        ? value.charAt(questionIndex + 1)
+        : "";
+
+      const prevChar = questionIndex - 1 >= 0
+        ? value.charAt(questionIndex - 1)
+        : "";
+
+      if (/[0-9０-９]/.test(nextChar)) {
+        return {
+          type: "digit",
+          typeLabel: "?＋数字",
+          autoReplace: true,
+          patternStart: questionIndex,
+          patternLength: 2
+        };
+      }
+
+      if (/[円日月]/.test(prevChar)) {
+        return {
+          type: "yenDayMonth",
+          typeLabel: "円・日・月＋?",
+          autoReplace: true,
+          patternStart: questionIndex - 1,
+          patternLength: 2
+        };
+      }
+
+      return {
+        type: "other",
+        typeLabel: "その他?",
+        autoReplace: false,
+        patternStart: questionIndex,
+        patternLength: 1
+      };
     }
 
     function createFinding({
       id,
       type,
       typeLabel,
+      autoReplace,
       rowIndex,
       colIndex,
       colName,
       jobNumber,
       cellValue,
-      matchIndex,
-      matchLength
+      questionIndex,
+      patternStart,
+      patternLength
     }) {
-      const contextStart = Math.max(0, matchIndex - 5);
-      const contextEnd = Math.min(cellValue.length, matchIndex + matchLength + 5);
+      const contextStart = Math.max(0, patternStart - 5);
+      const contextEnd = Math.min(cellValue.length, patternStart + patternLength + 5);
       const originalContext = cellValue.slice(contextStart, contextEnd);
+
+      const defaultValue = autoReplace
+        ? replaceTargetQuestionOnly(originalContext, questionIndex - contextStart)
+        : originalContext;
 
       return {
         id,
         type,
         typeLabel,
+        autoReplace,
         rowIndex,
         csvRowNumber: rowIndex + 1,
         colIndex,
         colName,
         jobNumber,
-        matchIndex,
-        matchLength,
+        questionIndex,
+        patternStart,
+        patternLength,
         contextStart,
         contextEnd,
         originalContext,
-        defaultValue: type === "digit"
-          ? originalContext.replace(/\?/g, "～")
-          : originalContext,
+        defaultValue,
         overlap: false
       };
+    }
+
+    function replaceTargetQuestionOnly(contextText, relativeQuestionIndex) {
+      if (
+        relativeQuestionIndex < 0 ||
+        relativeQuestionIndex >= contextText.length ||
+        contextText.charAt(relativeQuestionIndex) !== "?"
+      ) {
+        return contextText.replace("?", "～");
+      }
+
+      return (
+        contextText.slice(0, relativeQuestionIndex) +
+        "～" +
+        contextText.slice(relativeQuestionIndex + 1)
+      );
     }
 
     function markOverlaps(findings) {
@@ -759,14 +907,19 @@
 
     function renderEditor() {
       const digitFindings = state.findings.filter((item) => item.type === "digit");
+      const yenDayMonthFindings = state.findings.filter((item) => item.type === "yenDayMonth");
       const otherFindings = state.findings.filter((item) => item.type === "other");
       const overlapCount = state.findings.filter((item) => item.overlap).length;
 
       els.fileNameLabel.textContent = state.fileName;
-      els.encodingLabel.textContent = `検出文字コード：${state.detectedEncoding}`;
+      els.encodingLabel.textContent = `検出文字コード：${state.detectedEncodingLabel}（${state.detectedEncoding}）`;
+      els.outputEncodingLabel.textContent = `出力文字コード：${state.outputEncodingLabel}`;
+      els.downloadEncodingText.textContent = `出力文字コード：${state.outputEncodingLabel}`;
+
       els.rowCount.textContent = String(Math.max(0, state.rows.length - 1));
       els.foundHeaderCount.textContent = String(state.targetColumns.length);
       els.digitCount.textContent = String(digitFindings.length);
+      els.yenDayMonthCount.textContent = String(yenDayMonthFindings.length);
       els.otherCount.textContent = String(otherFindings.length);
 
       if (state.missingHeaders.length > 0) {
@@ -801,6 +954,7 @@
       }
 
       renderFindingList(els.digitList, digitFindings);
+      renderFindingList(els.yenDayMonthList, yenDayMonthFindings);
       renderFindingList(els.otherList, otherFindings);
     }
 
@@ -832,6 +986,12 @@
         }
 
         meta.appendChild(createBadge(`列：${finding.colName}`, "gray"));
+
+        if (finding.autoReplace) {
+          meta.appendChild(createBadge("初期値で～に置換", "auto"));
+        } else {
+          meta.appendChild(createBadge("初期値は未置換", "gray"));
+        }
 
         if (finding.overlap) {
           meta.appendChild(createBadge("抽出範囲重複", "warn"));
@@ -875,8 +1035,8 @@
     }
 
     function buildHighlightedContext(finding) {
-      const relStart = finding.matchIndex - finding.contextStart;
-      const relEnd = relStart + finding.matchLength;
+      const relStart = finding.patternStart - finding.contextStart;
+      const relEnd = relStart + finding.patternLength;
 
       const before = finding.originalContext.slice(0, relStart);
       const matched = finding.originalContext.slice(relStart, relEnd);
@@ -895,6 +1055,7 @@
 
         const key = `${finding.rowIndex}:${finding.colIndex}`;
         if (!byCell.has(key)) byCell.set(key, []);
+
         byCell.get(key).push({
           ...finding,
           editedValue
@@ -932,18 +1093,37 @@
         skipEmptyLines: false
       });
 
-      const blob = new Blob(["\uFEFF", csv], {
-        type: "text/csv;charset=utf-8;"
-      });
-
+      const blob = createCsvBlob(csv);
       const url = URL.createObjectURL(blob);
+
       const a = document.createElement("a");
       a.href = url;
       a.download = buildOutputFileName(state.fileName);
       document.body.appendChild(a);
       a.click();
       a.remove();
+
       URL.revokeObjectURL(url);
+    }
+
+    function createCsvBlob(csv) {
+      if (state.outputEncoding === "SJIS") {
+        const unicodeArray = Encoding.stringToCode(csv);
+        const sjisArray = Encoding.convert(unicodeArray, {
+          to: "SJIS",
+          from: "UNICODE"
+        });
+
+        const uint8Array = new Uint8Array(sjisArray);
+
+        return new Blob([uint8Array], {
+          type: "text/csv;charset=Shift_JIS;"
+        });
+      }
+
+      return new Blob(["\uFEFF", csv], {
+        type: "text/csv;charset=utf-8;"
+      });
     }
 
     function buildOutputFileName(originalName) {
@@ -968,6 +1148,9 @@
     function resetApp() {
       state.fileName = "";
       state.detectedEncoding = "";
+      state.detectedEncodingLabel = "";
+      state.outputEncoding = "UTF8_BOM";
+      state.outputEncodingLabel = "UTF-8 with BOM";
       state.rows = [];
       state.header = [];
       state.targetColumns = [];
