@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>波ダッシュバスター（CSV ? 置換チェックツール）</title>
+  <title>CSV ? 置換チェックツール</title>
 
   <!-- CSV parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
@@ -41,108 +41,20 @@
     }
 
     header {
-      position: relative;
-      overflow: hidden;
-      isolation: isolate;
-      padding: 34px 20px 32px;
+      padding: 28px 20px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
       color: #fff;
-      background:
-        radial-gradient(circle at 18% 20%, rgba(125, 211, 252, 0.35), transparent 28%),
-        radial-gradient(circle at 82% 30%, rgba(59, 130, 246, 0.32), transparent 30%),
-        linear-gradient(135deg, #07111f 0%, #0f2a55 35%, #1d4ed8 68%, #0891b2 100%);
-    }
-
-    header::before {
-      content: "";
-      position: absolute;
-      inset: -70px -120px;
-      z-index: -1;
-      background:
-        linear-gradient(
-          115deg,
-          transparent 0%,
-          transparent 42%,
-          rgba(255, 255, 255, 0.18) 43%,
-          rgba(255, 255, 255, 0.02) 47%,
-          transparent 48%,
-          transparent 100%
-        ),
-        linear-gradient(
-          115deg,
-          transparent 0%,
-          transparent 58%,
-          rgba(34, 211, 238, 0.30) 59%,
-          rgba(34, 211, 238, 0.04) 63%,
-          transparent 64%,
-          transparent 100%
-        ),
-        repeating-linear-gradient(
-          115deg,
-          transparent 0,
-          transparent 74px,
-          rgba(255, 255, 255, 0.055) 75px,
-          rgba(255, 255, 255, 0.055) 77px,
-          transparent 78px,
-          transparent 142px
-        );
-      transform: skewX(-10deg);
-    }
-
-    header::after {
-      content: "";
-      position: absolute;
-      right: -80px;
-      top: -120px;
-      width: 360px;
-      height: 360px;
-      z-index: -1;
-      background:
-        conic-gradient(
-          from 210deg,
-          transparent,
-          rgba(255, 255, 255, 0.16),
-          transparent,
-          rgba(34, 211, 238, 0.20),
-          transparent
-        );
-      filter: blur(1px);
-      opacity: 0.9;
     }
 
     header h1 {
-      position: relative;
       margin: 0 0 8px;
-      font-size: clamp(25px, 4vw, 38px);
-      font-weight: 900;
-      letter-spacing: 0.04em;
-      line-height: 1.2;
-      text-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
-    }
-
-    header h1::after {
-      content: "CSV ? 置換チェックツール";
-      display: inline-flex;
-      align-items: center;
-      margin-left: 14px;
-      padding: 5px 10px;
-      border: 1px solid rgba(255, 255, 255, 0.36);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(8px);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      vertical-align: middle;
-      text-shadow: none;
+      font-size: 24px;
     }
 
     header p {
-      position: relative;
       margin: 0;
-      max-width: 720px;
-      opacity: 0.94;
+      opacity: 0.9;
       font-size: 14px;
-      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.26);
     }
 
     main {
@@ -171,19 +83,58 @@
     .upload-box {
       border: 2px dashed #b6c2d5;
       border-radius: var(--radius);
-      padding: 36px 20px;
-      text-align: center;
+      padding: 30px 20px;
       background: #fff;
     }
 
     .upload-box h2 {
       margin: 0 0 10px;
       font-size: 20px;
+      text-align: center;
     }
 
     .upload-box p {
       color: var(--muted);
       margin: 0 0 20px;
+      text-align: center;
+    }
+
+    .mode-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0 24px;
+    }
+
+    .mode-toggle label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      cursor: pointer;
+      background: #f8fafc;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .mode-toggle input {
+      accent-color: var(--accent);
+    }
+
+    .upload-area {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fafc;
+    }
+
+    .upload-area.hidden {
+      display: none;
     }
 
     input[type="file"] {
@@ -220,6 +171,14 @@
       cursor: not-allowed;
     }
 
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 14px;
+    }
+
     .toolbar {
       display: flex;
       gap: 10px;
@@ -227,6 +186,13 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .stats {
@@ -273,6 +239,12 @@
       border: 1px solid #a7f3d0;
     }
 
+    .notice.info {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
     .section-title {
       display: flex;
       align-items: baseline;
@@ -303,6 +275,44 @@
     .finding.overlap {
       border-color: #f59e0b;
       background: #fffbeb;
+    }
+
+    .csv-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff;
+      margin-bottom: 12px;
+    }
+
+    .csv-card-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    .csv-card-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .mini-stat {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 8px;
+    }
+
+    .mini-stat .label {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .mini-stat .value {
+      font-weight: 800;
+      font-size: 18px;
     }
 
     .meta {
@@ -431,56 +441,105 @@
     }
 
     @media (max-width: 960px) {
-      .stats {
+      .stats,
+      .csv-card-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 
     @media (max-width: 760px) {
-      .stats {
+      .stats,
+      .csv-card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       header h1 {
-        font-size: 25px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      header {
-        padding: 30px 18px 28px;
-      }
-
-      header h1::after {
-        display: flex;
-        width: fit-content;
-        margin: 10px 0 0;
+        font-size: 21px;
       }
     }
 
     @media (max-width: 480px) {
-      .stats {
+      .stats,
+      .csv-card-grid {
         grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
+
 <body>
   <header>
-    <h1>波ダッシュバスター</h1>
-    <p>CSV内の半角 ? （波ダッシュ由来疑惑）を、全角チルダ「～」へ整えます。</p>
+    <h1>CSV ? 置換チェックツール</h1>
+    <p>対象列内の半角 ? を3分類で検出し、編集値を反映したCSVを出力します。</p>
   </header>
 
   <main>
+    <!-- 1. Upload screen -->
     <section id="uploadScreen" class="screen active">
       <div class="panel upload-box">
         <h2>CSVファイルをアップロード</h2>
         <p>UTF-8 / Shift-JIS のCSVに対応しています。処理はブラウザ内だけで行います。</p>
-        <input id="fileInput" type="file" accept=".csv,text/csv" />
+
+        <div class="mode-toggle" aria-label="アップロードモード選択">
+          <label>
+            <input type="radio" name="uploadMode" value="single" checked />
+            個別CSV
+          </label>
+          <label>
+            <input type="radio" name="uploadMode" value="multi" />
+            複数CSV
+          </label>
+        </div>
+
+        <div id="singleUploadArea" class="upload-area">
+          <strong>個別CSVモード</strong>
+          <div class="small">1つのCSVを選ぶと、これまで通りすぐに検証結果画面へ進みます。</div>
+          <div class="button-row">
+            <input id="singleFileInput" type="file" accept=".csv,text/csv" />
+          </div>
+        </div>
+
+        <div id="multiUploadArea" class="upload-area hidden">
+          <strong>複数CSVモード</strong>
+          <div class="small">複数のCSVを選択後、「選択したCSVを読み込む」ボタンを押してください。検出が1件以上あるCSVだけが次画面に表示されます。</div>
+          <div class="button-row">
+            <input id="multiFileInput" type="file" accept=".csv,text/csv" multiple />
+            <button type="button" id="multiLoadButton" disabled>選択したCSVを読み込む</button>
+          </div>
+          <div id="multiSelectedCount" class="small">CSVが選択されていません。</div>
+        </div>
+
+        <div id="uploadStatus" class="notice info" style="display: none;"></div>
         <div id="uploadError" class="notice warn" style="display: none;"></div>
       </div>
     </section>
 
+    <!-- 2. CSV selection screen -->
+    <section id="selectScreen" class="screen">
+      <div class="panel">
+        <div class="toolbar">
+          <div>
+            <strong>検出ありCSVの選択</strong>
+            <div class="small">検出が1件以上あるCSVだけを表示しています。</div>
+          </div>
+          <button type="button" class="secondary" id="selectBackToUploadButton">最初のCSVアップロード画面へ戻る</button>
+        </div>
+
+        <div id="selectionSummary" class="notice info"></div>
+        <div id="multiFailedBox" class="notice warn" style="display: none;"></div>
+        <div id="noCandidateBox" class="notice ok" style="display: none;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <h2>確認するCSVを選択</h2>
+          <span>各CSVの検出件数を確認して選べます。</span>
+        </div>
+        <div id="csvCandidateList"></div>
+      </div>
+    </section>
+
+    <!-- 3. Editor screen -->
     <section id="editorScreen" class="screen">
       <div class="panel">
         <div class="toolbar">
@@ -489,7 +548,10 @@
             <div class="small" id="encodingLabel"></div>
             <div class="small" id="outputEncodingLabel"></div>
           </div>
-          <button type="button" class="secondary" id="resetButton">別のCSVを読み込む</button>
+          <div class="toolbar-actions">
+            <button type="button" class="secondary" id="backToSelectButton" style="display: none;">CSV選択画面へ戻る</button>
+            <button type="button" class="secondary" id="resetButton">最初のCSVアップロード画面へ戻る</button>
+          </div>
         </div>
 
         <div class="stats">
@@ -547,7 +609,7 @@
       <div class="download-area">
         <div class="download-inner">
           <div>
-            <strong>編集内容を反映してCSVを出力</strong>
+            <strong>表示中のCSVを出力</strong>
             <div class="small" id="downloadEncodingText">出力文字コード：入力に応じて自動判定</div>
             <div class="small">元の列順・加工対象外列は保持します。</div>
           </div>
@@ -558,6 +620,8 @@
   </main>
 
   <script>
+    const CONTEXT_WIDTH = 10;
+
     const TARGET_HEADERS = [
       "仕事番号",
       "雇用形態備考",
@@ -617,75 +681,167 @@
       "紹介先企業名"
     ];
 
-    const state = {
-      fileName: "",
-      detectedEncoding: "",
-      detectedEncodingLabel: "",
-      outputEncoding: "UTF8_BOM",
-      outputEncodingLabel: "UTF-8 with BOM",
-      rows: [],
-      header: [],
-      targetColumns: [],
-      missingHeaders: [],
-      findings: []
+    const appState = {
+      uploadMode: "single",
+      csvItems: [],
+      failedFiles: [],
+      currentCsvId: null,
+      nextCsvId: 1
     };
 
     const els = {
       uploadScreen: document.getElementById("uploadScreen"),
+      selectScreen: document.getElementById("selectScreen"),
       editorScreen: document.getElementById("editorScreen"),
-      fileInput: document.getElementById("fileInput"),
+
+      singleUploadArea: document.getElementById("singleUploadArea"),
+      multiUploadArea: document.getElementById("multiUploadArea"),
+      singleFileInput: document.getElementById("singleFileInput"),
+      multiFileInput: document.getElementById("multiFileInput"),
+      multiLoadButton: document.getElementById("multiLoadButton"),
+      multiSelectedCount: document.getElementById("multiSelectedCount"),
+      uploadStatus: document.getElementById("uploadStatus"),
       uploadError: document.getElementById("uploadError"),
+
+      selectionSummary: document.getElementById("selectionSummary"),
+      multiFailedBox: document.getElementById("multiFailedBox"),
+      noCandidateBox: document.getElementById("noCandidateBox"),
+      csvCandidateList: document.getElementById("csvCandidateList"),
+      selectBackToUploadButton: document.getElementById("selectBackToUploadButton"),
+
       resetButton: document.getElementById("resetButton"),
+      backToSelectButton: document.getElementById("backToSelectButton"),
       fileNameLabel: document.getElementById("fileNameLabel"),
       encodingLabel: document.getElementById("encodingLabel"),
       outputEncodingLabel: document.getElementById("outputEncodingLabel"),
+
       rowCount: document.getElementById("rowCount"),
       foundHeaderCount: document.getElementById("foundHeaderCount"),
       digitCount: document.getElementById("digitCount"),
       yenDayMonthCount: document.getElementById("yenDayMonthCount"),
       otherCount: document.getElementById("otherCount"),
+
       missingHeadersBox: document.getElementById("missingHeadersBox"),
       overlapBox: document.getElementById("overlapBox"),
       noHitBox: document.getElementById("noHitBox"),
+
       digitList: document.getElementById("digitList"),
       yenDayMonthList: document.getElementById("yenDayMonthList"),
       otherList: document.getElementById("otherList"),
+
       downloadEncodingText: document.getElementById("downloadEncodingText"),
       downloadButton: document.getElementById("downloadButton")
     };
 
-    els.fileInput.addEventListener("change", async (event) => {
+    document.querySelectorAll('input[name="uploadMode"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        setUploadMode(radio.value);
+      });
+    });
+
+    els.singleFileInput.addEventListener("change", async (event) => {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
 
       try {
-        hideUploadError();
-        await loadCsvFile(file);
+        clearUploadMessages();
+        setUploadStatus("CSVを読み込んでいます。");
+        resetCsvStateOnly();
+
+        const item = await parseCsvFile(file);
+        appState.csvItems = [item];
+        appState.currentCsvId = item.id;
+
+        clearUploadMessages();
+        renderEditor();
+        switchScreen("editor");
       } catch (error) {
         console.error(error);
         showUploadError(error.message || "CSVの読み込み中にエラーが発生しました。");
       }
     });
 
+    els.multiFileInput.addEventListener("change", () => {
+      const files = Array.from(els.multiFileInput.files || []);
+      els.multiLoadButton.disabled = files.length === 0;
+      els.multiSelectedCount.textContent = files.length > 0
+        ? `${files.length}件のCSVが選択されています。`
+        : "CSVが選択されていません。";
+    });
+
+    els.multiLoadButton.addEventListener("click", async () => {
+      const files = Array.from(els.multiFileInput.files || []);
+      if (files.length === 0) return;
+
+      try {
+        clearUploadMessages();
+        resetCsvStateOnly();
+        els.multiLoadButton.disabled = true;
+        setUploadStatus(`${files.length}件のCSVを読み込んでいます。`);
+
+        for (const file of files) {
+          try {
+            const item = await parseCsvFile(file);
+            appState.csvItems.push(item);
+          } catch (error) {
+            console.error(error);
+            appState.failedFiles.push({
+              fileName: file.name,
+              message: error.message || "読み込みに失敗しました。"
+            });
+          }
+        }
+
+        if (appState.csvItems.length === 0) {
+          throw new Error("読み込みに成功したCSVがありませんでした。ファイル形式や文字コードを確認してください。");
+        }
+
+        clearUploadMessages();
+        renderSelectionScreen();
+        switchScreen("select");
+      } catch (error) {
+        console.error(error);
+        showUploadError(error.message || "複数CSVの読み込み中にエラーが発生しました。");
+      } finally {
+        els.multiLoadButton.disabled = files.length === 0;
+      }
+    });
+
+    els.selectBackToUploadButton.addEventListener("click", () => {
+      resetAll();
+    });
+
+    els.backToSelectButton.addEventListener("click", () => {
+      captureCurrentEdits();
+      renderSelectionScreen();
+      switchScreen("select");
+    });
+
     els.resetButton.addEventListener("click", () => {
-      resetApp();
+      resetAll();
     });
 
     els.downloadButton.addEventListener("click", () => {
       downloadEditedCsv();
     });
 
-    async function loadCsvFile(file) {
-      state.fileName = file.name;
+    function setUploadMode(mode) {
+      appState.uploadMode = mode;
 
+      const isMulti = mode === "multi";
+      els.singleUploadArea.classList.toggle("hidden", isMulti);
+      els.multiUploadArea.classList.toggle("hidden", !isMulti);
+
+      clearUploadMessages();
+      els.singleFileInput.value = "";
+      els.multiFileInput.value = "";
+      els.multiLoadButton.disabled = true;
+      els.multiSelectedCount.textContent = "CSVが選択されていません。";
+    }
+
+    async function parseCsvFile(file) {
       const buffer = await file.arrayBuffer();
       const decoded = decodeCsvText(buffer);
-
-      state.detectedEncoding = decoded.encoding;
-      state.detectedEncodingLabel = decoded.encodingLabel;
-      state.outputEncoding = decoded.outputEncoding;
-      state.outputEncodingLabel = decoded.outputEncodingLabel;
-
       const csvText = decoded.text.replace(/^\uFEFF/, "");
 
       const parsed = Papa.parse(csvText, {
@@ -695,7 +851,7 @@
       });
 
       if (parsed.errors && parsed.errors.length > 0) {
-        console.warn("Papa Parse warnings/errors:", parsed.errors);
+        console.warn(`Papa Parse warnings/errors: ${file.name}`, parsed.errors);
       }
 
       const rows = parsed.data;
@@ -704,17 +860,30 @@
         throw new Error("CSVを読み込めませんでした。1行目にヘッダーがあるCSVか確認してください。");
       }
 
-      state.rows = normalizeRows(rows);
-      state.header = state.rows[0].map((value, index) => {
+      const item = {
+        id: appState.nextCsvId++,
+        fileName: file.name,
+        detectedEncoding: decoded.encoding,
+        detectedEncodingLabel: decoded.encodingLabel,
+        outputEncoding: decoded.outputEncoding,
+        outputEncodingLabel: decoded.outputEncodingLabel,
+        rows: normalizeRows(rows),
+        header: [],
+        targetColumns: [],
+        missingHeaders: [],
+        findings: []
+      };
+
+      item.header = item.rows[0].map((value, index) => {
         const text = value == null ? "" : String(value);
         return index === 0 ? text.replace(/^\uFEFF/, "") : text;
       });
-      state.rows[0] = state.header.slice();
+      item.rows[0] = item.header.slice();
 
-      buildTargetColumns();
-      buildFindings();
-      renderEditor();
-      switchScreen("editor");
+      buildTargetColumns(item);
+      buildFindings(item);
+
+      return item;
     }
 
     function decodeCsvText(arrayBuffer) {
@@ -791,40 +960,40 @@
       });
     }
 
-    function buildTargetColumns() {
+    function buildTargetColumns(item) {
       const headerIndexMap = new Map();
 
-      state.header.forEach((name, index) => {
+      item.header.forEach((name, index) => {
         if (!headerIndexMap.has(name)) {
           headerIndexMap.set(name, index);
         }
       });
 
-      state.targetColumns = [];
-      state.missingHeaders = [];
+      item.targetColumns = [];
+      item.missingHeaders = [];
 
       TARGET_HEADERS.forEach((name) => {
         if (headerIndexMap.has(name)) {
-          state.targetColumns.push({
+          item.targetColumns.push({
             name,
             index: headerIndexMap.get(name)
           });
         } else {
-          state.missingHeaders.push(name);
+          item.missingHeaders.push(name);
         }
       });
     }
 
-    function buildFindings() {
+    function buildFindings(item) {
       const findings = [];
-      const jobNumberCol = state.header.indexOf("仕事番号");
+      const jobNumberCol = item.header.indexOf("仕事番号");
       let idCounter = 1;
 
-      for (let rowIndex = 1; rowIndex < state.rows.length; rowIndex++) {
-        const row = state.rows[rowIndex];
+      for (let rowIndex = 1; rowIndex < item.rows.length; rowIndex++) {
+        const row = item.rows[rowIndex];
         const jobNumber = jobNumberCol >= 0 ? String(row[jobNumberCol] ?? "") : "";
 
-        state.targetColumns.forEach((col) => {
+        item.targetColumns.forEach((col) => {
           const value = String(row[col.index] ?? "");
           if (!value.includes("?")) return;
 
@@ -844,7 +1013,7 @@
       }
 
       markOverlaps(findings);
-      state.findings = findings;
+      item.findings = findings;
     }
 
     function collectQuestionMarkFindings({
@@ -936,8 +1105,8 @@
       patternStart,
       patternLength
     }) {
-      const contextStart = Math.max(0, patternStart - 10);
-      const contextEnd = Math.min(cellValue.length, patternStart + patternLength + 10);
+      const contextStart = Math.max(0, patternStart - CONTEXT_WIDTH);
+      const contextEnd = Math.min(cellValue.length, patternStart + patternLength + CONTEXT_WIDTH);
       const originalContext = cellValue.slice(contextStart, contextEnd);
 
       const defaultValue = autoReplace
@@ -961,6 +1130,7 @@
         contextEnd,
         originalContext,
         defaultValue,
+        editedValue: null,
         overlap: false
       };
     }
@@ -1005,31 +1175,130 @@
       });
     }
 
+    function renderSelectionScreen() {
+      const hitItems = appState.csvItems.filter((item) => item.findings.length > 0);
+      const noHitCount = appState.csvItems.length - hitItems.length;
+
+      els.selectionSummary.innerHTML = `
+        読み込み成功CSV：<strong>${appState.csvItems.length}</strong>件 /
+        検出ありCSV：<strong>${hitItems.length}</strong>件 /
+        検出なしCSV：<strong>${noHitCount}</strong>件
+      `;
+
+      if (appState.failedFiles.length > 0) {
+        els.multiFailedBox.style.display = "block";
+        els.multiFailedBox.innerHTML = `
+          <strong>読み込みに失敗したCSVがあります。</strong>
+          <details>
+            <summary>失敗したファイルを表示</summary>
+            <ul>
+              ${appState.failedFiles.map((file) => (
+                `<li>${escapeHtml(file.fileName)}：${escapeHtml(file.message)}</li>`
+              )).join("")}
+            </ul>
+          </details>
+        `;
+      } else {
+        els.multiFailedBox.style.display = "none";
+      }
+
+      if (hitItems.length === 0) {
+        els.noCandidateBox.style.display = "block";
+        els.noCandidateBox.textContent = "アップロードされたCSVに、検出対象の半角 ? は見つかりませんでした。";
+      } else {
+        els.noCandidateBox.style.display = "none";
+      }
+
+      els.csvCandidateList.innerHTML = "";
+
+      if (hitItems.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "選択できるCSVはありません。";
+        els.csvCandidateList.appendChild(empty);
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      hitItems.forEach((item) => {
+        const counts = getFindingCounts(item);
+        const card = document.createElement("div");
+        card.className = "csv-card";
+
+        const title = document.createElement("div");
+        title.className = "csv-card-title";
+        title.textContent = item.fileName;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.appendChild(createBadge(`検出合計：${counts.total}件`));
+        meta.appendChild(createBadge(`入力：${item.detectedEncodingLabel}`, "gray"));
+        meta.appendChild(createBadge(`出力：${item.outputEncodingLabel}`, "gray"));
+
+        const grid = document.createElement("div");
+        grid.className = "csv-card-grid";
+        grid.appendChild(createMiniStat("?＋数字", counts.digit));
+        grid.appendChild(createMiniStat("円日月＋?", counts.yenDayMonth));
+        grid.appendChild(createMiniStat("その他?", counts.other));
+        grid.appendChild(createMiniStat("CSV行数", Math.max(0, item.rows.length - 1)));
+        grid.appendChild(createMiniStat("対象列", item.targetColumns.length));
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = "このCSVを確認";
+        button.addEventListener("click", () => {
+          appState.currentCsvId = item.id;
+          renderEditor();
+          switchScreen("editor");
+        });
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(grid);
+        card.appendChild(button);
+        fragment.appendChild(card);
+      });
+
+      els.csvCandidateList.appendChild(fragment);
+    }
+
     function renderEditor() {
-      const digitFindings = state.findings.filter((item) => item.type === "digit");
-      const yenDayMonthFindings = state.findings.filter((item) => item.type === "yenDayMonth");
-      const otherFindings = state.findings.filter((item) => item.type === "other");
-      const overlapCount = state.findings.filter((item) => item.overlap).length;
+      const item = getCurrentCsvItem();
+      if (!item) {
+        showUploadError("表示対象のCSVが見つかりません。");
+        switchScreen("upload");
+        return;
+      }
 
-      els.fileNameLabel.textContent = state.fileName;
-      els.encodingLabel.textContent = `検出文字コード：${state.detectedEncodingLabel}（${state.detectedEncoding}）`;
-      els.outputEncodingLabel.textContent = `出力文字コード：${state.outputEncodingLabel}`;
-      els.downloadEncodingText.textContent = `出力文字コード：${state.outputEncodingLabel}`;
+      const counts = getFindingCounts(item);
+      const overlapCount = item.findings.filter((finding) => finding.overlap).length;
 
-      els.rowCount.textContent = String(Math.max(0, state.rows.length - 1));
-      els.foundHeaderCount.textContent = String(state.targetColumns.length);
-      els.digitCount.textContent = String(digitFindings.length);
-      els.yenDayMonthCount.textContent = String(yenDayMonthFindings.length);
-      els.otherCount.textContent = String(otherFindings.length);
+      els.fileNameLabel.textContent = item.fileName;
+      els.encodingLabel.textContent = `検出文字コード：${item.detectedEncodingLabel}（${item.detectedEncoding}）`;
+      els.outputEncodingLabel.textContent = `出力文字コード：${item.outputEncodingLabel}`;
+      els.downloadEncodingText.textContent = `出力文字コード：${item.outputEncodingLabel}`;
 
-      if (state.missingHeaders.length > 0) {
+      els.rowCount.textContent = String(Math.max(0, item.rows.length - 1));
+      els.foundHeaderCount.textContent = String(item.targetColumns.length);
+      els.digitCount.textContent = String(counts.digit);
+      els.yenDayMonthCount.textContent = String(counts.yenDayMonth);
+      els.otherCount.textContent = String(counts.other);
+
+      const isMulti = appState.uploadMode === "multi";
+      els.backToSelectButton.style.display = isMulti ? "inline-flex" : "none";
+      els.resetButton.textContent = isMulti
+        ? "最初のCSVアップロード画面へ戻る"
+        : "別のCSVを読み込む";
+
+      if (item.missingHeaders.length > 0) {
         els.missingHeadersBox.style.display = "block";
         els.missingHeadersBox.innerHTML = `
           <strong>存在しない対象列があります。</strong><br>
           存在した対象列のみ処理しました。
           <details>
             <summary>存在しなかった列を表示</summary>
-            <ul>${state.missingHeaders.map((name) => `<li>${escapeHtml(name)}</li>`).join("")}</ul>
+            <ul>${item.missingHeaders.map((name) => `<li>${escapeHtml(name)}</li>`).join("")}</ul>
           </details>
         `;
       } else {
@@ -1039,23 +1308,23 @@
       if (overlapCount > 0) {
         els.overlapBox.style.display = "block";
         els.overlapBox.innerHTML = `
-          <strong>前後10文字の抽出範囲が重なっている箇所があります。</strong><br>
+          <strong>前後${CONTEXT_WIDTH}文字の抽出範囲が重なっている箇所があります。</strong><br>
           重複範囲は黄色で表示しています。編集値の反映は同じセル内で後ろの位置から順に行います。
         `;
       } else {
         els.overlapBox.style.display = "none";
       }
 
-      if (state.findings.length === 0) {
+      if (item.findings.length === 0) {
         els.noHitBox.style.display = "block";
         els.noHitBox.textContent = "対象列内に半角 ? の検出箇所はありませんでした。このままCSV出力しても内容は変更されません。";
       } else {
         els.noHitBox.style.display = "none";
       }
 
-      renderFindingList(els.digitList, digitFindings);
-      renderFindingList(els.yenDayMonthList, yenDayMonthFindings);
-      renderFindingList(els.otherList, otherFindings);
+      renderFindingList(els.digitList, item.findings.filter((finding) => finding.type === "digit"));
+      renderFindingList(els.yenDayMonthList, item.findings.filter((finding) => finding.type === "yenDayMonth"));
+      renderFindingList(els.otherList, item.findings.filter((finding) => finding.type === "other"));
     }
 
     function renderFindingList(container, findings) {
@@ -1103,9 +1372,9 @@
 
         const textarea = document.createElement("textarea");
         textarea.id = `edit-${finding.id}`;
-        textarea.value = finding.defaultValue;
+        textarea.value = finding.editedValue ?? finding.defaultValue;
         textarea.dataset.findingId = String(finding.id);
-        textarea.rows = Math.max(2, finding.defaultValue.split(/\r\n|\r|\n/).length + 1);
+        textarea.rows = Math.max(2, textarea.value.split(/\r\n|\r|\n/).length + 1);
 
         card.appendChild(meta);
 
@@ -1127,33 +1396,31 @@
       container.appendChild(fragment);
     }
 
-    function createBadge(text, kind = "") {
-      const span = document.createElement("span");
-      span.className = kind ? `badge ${kind}` : "badge";
-      span.textContent = text;
-      return span;
-    }
+    function captureCurrentEdits() {
+      const item = getCurrentCsvItem();
+      if (!item) return;
 
-    function buildHighlightedContext(finding) {
-      const relStart = finding.patternStart - finding.contextStart;
-      const relEnd = relStart + finding.patternLength;
-
-      const before = finding.originalContext.slice(0, relStart);
-      const matched = finding.originalContext.slice(relStart, relEnd);
-      const after = finding.originalContext.slice(relEnd);
-
-      return `${escapeHtml(before)}<mark>${escapeHtml(matched)}</mark>${escapeHtml(after)}`;
+      item.findings.forEach((finding) => {
+        const textarea = document.getElementById(`edit-${finding.id}`);
+        if (textarea) {
+          finding.editedValue = textarea.value;
+        }
+      });
     }
 
     function downloadEditedCsv() {
-      const outputRows = state.rows.map((row) => row.slice());
+      const item = getCurrentCsvItem();
+      if (!item) return;
+
+      captureCurrentEdits();
+
+      const outputRows = item.rows.map((row) => row.slice());
       const byCell = new Map();
 
-      state.findings.forEach((finding) => {
-        const textarea = document.getElementById(`edit-${finding.id}`);
-        const editedValue = textarea ? textarea.value : finding.defaultValue;
-
+      item.findings.forEach((finding) => {
+        const editedValue = finding.editedValue ?? finding.defaultValue;
         const key = `${finding.rowIndex}:${finding.colIndex}`;
+
         if (!byCell.has(key)) byCell.set(key, []);
 
         byCell.get(key).push({
@@ -1176,11 +1443,11 @@
 
         let cellValue = String(outputRows[rowIndex][colIndex] ?? "");
 
-        items.forEach((item) => {
+        items.forEach((finding) => {
           cellValue =
-            cellValue.slice(0, item.contextStart) +
-            item.editedValue +
-            cellValue.slice(item.contextEnd);
+            cellValue.slice(0, finding.contextStart) +
+            finding.editedValue +
+            cellValue.slice(finding.contextEnd);
         });
 
         outputRows[rowIndex][colIndex] = cellValue;
@@ -1193,12 +1460,12 @@
         skipEmptyLines: false
       });
 
-      const blob = createCsvBlob(csv);
+      const blob = createCsvBlob(csv, item);
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = buildOutputFileName(state.fileName);
+      a.download = buildOutputFileName(item.fileName);
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -1206,8 +1473,8 @@
       URL.revokeObjectURL(url);
     }
 
-    function createCsvBlob(csv) {
-      if (state.outputEncoding === "SJIS") {
+    function createCsvBlob(csv, item) {
+      if (item.outputEncoding === "SJIS") {
         const unicodeArray = Encoding.stringToCode(csv);
         const sjisArray = Encoding.convert(unicodeArray, {
           to: "SJIS",
@@ -1239,35 +1506,100 @@
       return `${base}_fixed_${yyyy}${mm}${dd}_${hh}${mi}${ss}.csv`;
     }
 
+    function getFindingCounts(item) {
+      const digit = item.findings.filter((finding) => finding.type === "digit").length;
+      const yenDayMonth = item.findings.filter((finding) => finding.type === "yenDayMonth").length;
+      const other = item.findings.filter((finding) => finding.type === "other").length;
+
+      return {
+        digit,
+        yenDayMonth,
+        other,
+        total: digit + yenDayMonth + other
+      };
+    }
+
+    function getCurrentCsvItem() {
+      return appState.csvItems.find((item) => item.id === appState.currentCsvId) || null;
+    }
+
+    function createBadge(text, kind = "") {
+      const span = document.createElement("span");
+      span.className = kind ? `badge ${kind}` : "badge";
+      span.textContent = text;
+      return span;
+    }
+
+    function createMiniStat(label, value) {
+      const div = document.createElement("div");
+      div.className = "mini-stat";
+
+      const labelDiv = document.createElement("div");
+      labelDiv.className = "label";
+      labelDiv.textContent = label;
+
+      const valueDiv = document.createElement("div");
+      valueDiv.className = "value";
+      valueDiv.textContent = String(value);
+
+      div.appendChild(labelDiv);
+      div.appendChild(valueDiv);
+
+      return div;
+    }
+
+    function buildHighlightedContext(finding) {
+      const relStart = finding.patternStart - finding.contextStart;
+      const relEnd = relStart + finding.patternLength;
+
+      const before = finding.originalContext.slice(0, relStart);
+      const matched = finding.originalContext.slice(relStart, relEnd);
+      const after = finding.originalContext.slice(relEnd);
+
+      return `${escapeHtml(before)}<mark>${escapeHtml(matched)}</mark>${escapeHtml(after)}`;
+    }
+
     function switchScreen(screenName) {
       els.uploadScreen.classList.toggle("active", screenName === "upload");
+      els.selectScreen.classList.toggle("active", screenName === "select");
       els.editorScreen.classList.toggle("active", screenName === "editor");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function resetApp() {
-      state.fileName = "";
-      state.detectedEncoding = "";
-      state.detectedEncodingLabel = "";
-      state.outputEncoding = "UTF8_BOM";
-      state.outputEncodingLabel = "UTF-8 with BOM";
-      state.rows = [];
-      state.header = [];
-      state.targetColumns = [];
-      state.missingHeaders = [];
-      state.findings = [];
+    function resetCsvStateOnly() {
+      appState.csvItems = [];
+      appState.failedFiles = [];
+      appState.currentCsvId = null;
+      appState.nextCsvId = 1;
+    }
 
-      els.fileInput.value = "";
-      hideUploadError();
+    function resetAll() {
+      resetCsvStateOnly();
+
+      els.singleFileInput.value = "";
+      els.multiFileInput.value = "";
+      els.multiLoadButton.disabled = true;
+      els.multiSelectedCount.textContent = "CSVが選択されていません。";
+      clearUploadMessages();
+
       switchScreen("upload");
+    }
+
+    function setUploadStatus(message) {
+      els.uploadStatus.textContent = message;
+      els.uploadStatus.style.display = "block";
+      els.uploadError.style.display = "none";
     }
 
     function showUploadError(message) {
       els.uploadError.textContent = message;
       els.uploadError.style.display = "block";
+      els.uploadStatus.style.display = "none";
     }
 
-    function hideUploadError() {
+    function clearUploadMessages() {
+      els.uploadStatus.textContent = "";
+      els.uploadStatus.style.display = "none";
       els.uploadError.textContent = "";
       els.uploadError.style.display = "none";
     }
