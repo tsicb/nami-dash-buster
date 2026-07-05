@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSV ? 置換チェックツール</title>
+  <title>波ダッシュバスター</title>
 
   <!-- CSV parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
@@ -20,6 +20,7 @@
       --line: #d9dee8;
       --accent: #2563eb;
       --accent-dark: #1d4ed8;
+      --accent-soft: #dbeafe;
       --danger: #b45309;
       --danger-bg: #fff7ed;
       --ok-bg: #ecfdf5;
@@ -36,25 +37,82 @@
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 32%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 240px);
       line-height: 1.6;
     }
 
     header {
-      padding: 28px 20px;
-      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      position: relative;
+      overflow: hidden;
+      padding: 34px 20px 38px;
       color: #fff;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(255, 255, 255, 0.28), transparent 22%),
+        linear-gradient(135deg, #172554 0%, #1d4ed8 54%, #38bdf8 100%);
     }
 
-    header h1 {
-      margin: 0 0 8px;
-      font-size: 24px;
+    header::before {
+      content: "〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜";
+      position: absolute;
+      left: -30px;
+      bottom: -22px;
+      color: rgba(255, 255, 255, 0.13);
+      font-size: 76px;
+      font-weight: 900;
+      letter-spacing: -8px;
+      white-space: nowrap;
+      pointer-events: none;
     }
 
-    header p {
+    .hero {
+      position: relative;
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand-mark {
+      width: 64px;
+      height: 64px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .hero h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+      letter-spacing: 0.03em;
+    }
+
+    .hero p {
       margin: 0;
-      opacity: 0.9;
+      opacity: 0.92;
       font-size: 14px;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      font-size: 12px;
+      font-weight: 800;
     }
 
     main {
@@ -99,33 +157,66 @@
       text-align: center;
     }
 
-    .mode-toggle {
+    .mode-switch-wrap {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
       margin: 18px 0 24px;
     }
 
-    .mode-toggle label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border: 1px solid var(--line);
+    .mode-switch {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: min(100%, 360px);
+      padding: 4px;
       border-radius: 999px;
-      cursor: pointer;
-      background: #f8fafc;
-      font-weight: 700;
-      user-select: none;
+      background: #e5e7eb;
+      border: 1px solid #d1d5db;
+      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
     }
 
-    .mode-toggle input {
-      accent-color: var(--accent);
+    .mode-slider {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+      transform: translateX(0);
+      transition: transform 220ms ease;
+      z-index: 1;
+    }
+
+    .mode-switch[data-mode="multi"] .mode-slider {
+      transform: translateX(100%);
+    }
+
+    .mode-option {
+      position: relative;
+      z-index: 2;
+      border: none;
+      background: transparent;
+      color: #4b5563;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: color 180ms ease;
+    }
+
+    .mode-option:hover {
+      background: transparent;
+      color: #111827;
+    }
+
+    .mode-option.active {
+      color: var(--accent-dark);
     }
 
     .upload-area {
-      max-width: 680px;
+      max-width: 760px;
       margin: 0 auto;
       padding: 18px;
       border: 1px solid var(--line);
@@ -137,9 +228,40 @@
       display: none;
     }
 
-    input[type="file"] {
-      display: inline-block;
-      max-width: 100%;
+    .drop-zone {
+      margin-top: 14px;
+      padding: 28px 18px;
+      border: 2px dashed #b6c2d5;
+      border-radius: 16px;
+      background: #ffffff;
+      text-align: center;
+      transition:
+        border-color 160ms ease,
+        background-color 160ms ease,
+        box-shadow 160ms ease,
+        transform 160ms ease;
+    }
+
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: #eff6ff;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.13);
+      transform: translateY(-1px);
+    }
+
+    .drop-zone-title {
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .drop-zone-text {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .hidden-input {
+      display: none;
     }
 
     button {
@@ -176,6 +298,7 @@
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
+      justify-content: center;
       margin-top: 14px;
     }
 
@@ -448,20 +571,43 @@
     }
 
     @media (max-width: 760px) {
+      .hero {
+        align-items: flex-start;
+      }
+
+      .brand-mark {
+        width: 54px;
+        height: 54px;
+        font-size: 32px;
+        border-radius: 16px;
+      }
+
+      .hero h1 {
+        font-size: 24px;
+      }
+
       .stats,
       .csv-card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-
-      header h1 {
-        font-size: 21px;
-      }
     }
 
     @media (max-width: 480px) {
+      .hero {
+        gap: 12px;
+      }
+
+      .brand-mark {
+        display: none;
+      }
+
       .stats,
       .csv-card-grid {
         grid-template-columns: 1fr;
+      }
+
+      .mode-switch {
+        width: 100%;
       }
     }
   </style>
@@ -469,8 +615,14 @@
 
 <body>
   <header>
-    <h1>CSV ? 置換チェックツール</h1>
-    <p>対象列内の半角 ? を3分類で検出し、編集値を反映したCSVを出力します。</p>
+    <div class="hero">
+      <div class="brand-mark">〜</div>
+      <div>
+        <div class="brand-pill">CSV文字化け補修ツール</div>
+        <h1>波ダッシュバスター</h1>
+        <p>半角「?」に化けた波ダッシュ候補を検出し、確認しながらCSVへ戻します。</p>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -480,33 +632,40 @@
         <h2>CSVファイルをアップロード</h2>
         <p>UTF-8 / Shift-JIS のCSVに対応しています。処理はブラウザ内だけで行います。</p>
 
-        <div class="mode-toggle" aria-label="アップロードモード選択">
-          <label>
-            <input type="radio" name="uploadMode" value="single" checked />
-            個別CSV
-          </label>
-          <label>
-            <input type="radio" name="uploadMode" value="multi" />
-            複数CSV
-          </label>
+        <div class="mode-switch-wrap">
+          <div id="modeSwitch" class="mode-switch" data-mode="single" aria-label="アップロードモード選択">
+            <span class="mode-slider" aria-hidden="true"></span>
+            <button type="button" class="mode-option active" data-mode-button="single" aria-pressed="true">個別CSV</button>
+            <button type="button" class="mode-option" data-mode-button="multi" aria-pressed="false">複数CSV</button>
+          </div>
         </div>
 
         <div id="singleUploadArea" class="upload-area">
           <strong>個別CSVモード</strong>
           <div class="small">1つのCSVを選ぶと、これまで通りすぐに検証結果画面へ進みます。</div>
-          <div class="button-row">
-            <input id="singleFileInput" type="file" accept=".csv,text/csv" />
+
+          <div id="singleDropZone" class="drop-zone">
+            <div class="drop-zone-title">CSVをここにドラッグ＆ドロップ</div>
+            <div class="drop-zone-text">または下のボタンからCSVを選択してください。</div>
+            <button type="button" id="singleSelectButton">CSVを選択</button>
+            <input id="singleFileInput" class="hidden-input" type="file" accept=".csv,text/csv" />
           </div>
         </div>
 
         <div id="multiUploadArea" class="upload-area hidden">
           <strong>複数CSVモード</strong>
-          <div class="small">複数のCSVを選択後、「選択したCSVを読み込む」ボタンを押してください。検出が1件以上あるCSVだけが次画面に表示されます。</div>
-          <div class="button-row">
-            <input id="multiFileInput" type="file" accept=".csv,text/csv" multiple />
-            <button type="button" id="multiLoadButton" disabled>選択したCSVを読み込む</button>
+          <div class="small">複数のCSVを選択・ドロップ後、「選択したCSVを読み込む」ボタンを押してください。検出が1件以上あるCSVだけが次画面に表示されます。</div>
+
+          <div id="multiDropZone" class="drop-zone">
+            <div class="drop-zone-title">複数CSVをここにドラッグ＆ドロップ</div>
+            <div class="drop-zone-text">または下のボタンから複数CSVを選択してください。</div>
+            <div class="button-row">
+              <button type="button" id="multiSelectButton" class="secondary">CSVを選択</button>
+              <button type="button" id="multiLoadButton" disabled>選択したCSVを読み込む</button>
+            </div>
+            <input id="multiFileInput" class="hidden-input" type="file" accept=".csv,text/csv" multiple />
+            <div id="multiSelectedCount" class="small">CSVが選択されていません。</div>
           </div>
-          <div id="multiSelectedCount" class="small">CSVが選択されていません。</div>
         </div>
 
         <div id="uploadStatus" class="notice info" style="display: none;"></div>
@@ -683,6 +842,7 @@
 
     const appState = {
       uploadMode: "single",
+      selectedMultiFiles: [],
       csvItems: [],
       failedFiles: [],
       currentCsvId: null,
@@ -694,12 +854,20 @@
       selectScreen: document.getElementById("selectScreen"),
       editorScreen: document.getElementById("editorScreen"),
 
+      modeSwitch: document.getElementById("modeSwitch"),
       singleUploadArea: document.getElementById("singleUploadArea"),
       multiUploadArea: document.getElementById("multiUploadArea"),
+
+      singleDropZone: document.getElementById("singleDropZone"),
+      multiDropZone: document.getElementById("multiDropZone"),
+      singleSelectButton: document.getElementById("singleSelectButton"),
+      multiSelectButton: document.getElementById("multiSelectButton"),
+
       singleFileInput: document.getElementById("singleFileInput"),
       multiFileInput: document.getElementById("multiFileInput"),
       multiLoadButton: document.getElementById("multiLoadButton"),
       multiSelectedCount: document.getElementById("multiSelectedCount"),
+
       uploadStatus: document.getElementById("uploadStatus"),
       uploadError: document.getElementById("uploadError"),
 
@@ -733,16 +901,126 @@
       downloadButton: document.getElementById("downloadButton")
     };
 
-    document.querySelectorAll('input[name="uploadMode"]').forEach((radio) => {
-      radio.addEventListener("change", () => {
-        setUploadMode(radio.value);
+    document.querySelectorAll("[data-mode-button]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setUploadMode(button.dataset.modeButton);
       });
+    });
+
+    els.singleSelectButton.addEventListener("click", () => {
+      els.singleFileInput.click();
+    });
+
+    els.multiSelectButton.addEventListener("click", () => {
+      els.multiFileInput.click();
     });
 
     els.singleFileInput.addEventListener("change", async (event) => {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
+      await handleSingleFile(file);
+    });
 
+    els.multiFileInput.addEventListener("change", () => {
+      const files = Array.from(els.multiFileInput.files || []);
+      setSelectedMultiFiles(files);
+    });
+
+    els.multiLoadButton.addEventListener("click", async () => {
+      await loadSelectedMultiFiles();
+    });
+
+    els.selectBackToUploadButton.addEventListener("click", () => {
+      resetAll();
+    });
+
+    els.backToSelectButton.addEventListener("click", () => {
+      captureCurrentEdits();
+      renderSelectionScreen();
+      switchScreen("select");
+    });
+
+    els.resetButton.addEventListener("click", () => {
+      resetAll();
+    });
+
+    els.downloadButton.addEventListener("click", () => {
+      downloadEditedCsv();
+    });
+
+    setupDropZone(els.singleDropZone, async (files) => {
+      const file = files[0];
+      if (!file) return;
+
+      if (files.length > 1) {
+        setUploadStatus("個別CSVモードのため、先頭の1ファイルのみ読み込みます。");
+      }
+
+      await handleSingleFile(file);
+    });
+
+    setupDropZone(els.multiDropZone, (files) => {
+      setSelectedMultiFiles(files);
+      setUploadStatus(`${files.length}件のCSVがドロップされました。「選択したCSVを読み込む」を押してください。`);
+    });
+
+    function setupDropZone(zone, onDropFiles) {
+      zone.addEventListener("dragenter", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        zone.classList.add("dragover");
+      });
+
+      zone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        zone.classList.add("dragover");
+      });
+
+      zone.addEventListener("dragleave", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!zone.contains(event.relatedTarget)) {
+          zone.classList.remove("dragover");
+        }
+      });
+
+      zone.addEventListener("drop", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        zone.classList.remove("dragover");
+
+        const files = Array.from(event.dataTransfer.files || []);
+        if (files.length === 0) return;
+
+        await onDropFiles(files);
+      });
+    }
+
+    function setUploadMode(mode) {
+      appState.uploadMode = mode;
+
+      const isMulti = mode === "multi";
+
+      els.modeSwitch.dataset.mode = mode;
+
+      document.querySelectorAll("[data-mode-button]").forEach((button) => {
+        const active = button.dataset.modeButton === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+
+      els.singleUploadArea.classList.toggle("hidden", isMulti);
+      els.multiUploadArea.classList.toggle("hidden", !isMulti);
+
+      clearUploadMessages();
+      els.singleFileInput.value = "";
+      els.multiFileInput.value = "";
+      setSelectedMultiFiles([]);
+    }
+
+    async function handleSingleFile(file) {
       try {
         clearUploadMessages();
         setUploadStatus("CSVを読み込んでいます。");
@@ -759,23 +1037,26 @@
         console.error(error);
         showUploadError(error.message || "CSVの読み込み中にエラーが発生しました。");
       }
-    });
+    }
 
-    els.multiFileInput.addEventListener("change", () => {
-      const files = Array.from(els.multiFileInput.files || []);
-      els.multiLoadButton.disabled = files.length === 0;
-      els.multiSelectedCount.textContent = files.length > 0
-        ? `${files.length}件のCSVが選択されています。`
+    function setSelectedMultiFiles(files) {
+      appState.selectedMultiFiles = Array.from(files || []);
+
+      els.multiLoadButton.disabled = appState.selectedMultiFiles.length === 0;
+      els.multiSelectedCount.textContent = appState.selectedMultiFiles.length > 0
+        ? `${appState.selectedMultiFiles.length}件のCSVが選択されています。`
         : "CSVが選択されていません。";
-    });
+    }
 
-    els.multiLoadButton.addEventListener("click", async () => {
-      const files = Array.from(els.multiFileInput.files || []);
+    async function loadSelectedMultiFiles() {
+      const files = appState.selectedMultiFiles;
       if (files.length === 0) return;
 
       try {
         clearUploadMessages();
         resetCsvStateOnly();
+        appState.selectedMultiFiles = files;
+
         els.multiLoadButton.disabled = true;
         setUploadStatus(`${files.length}件のCSVを読み込んでいます。`);
 
@@ -803,40 +1084,8 @@
         console.error(error);
         showUploadError(error.message || "複数CSVの読み込み中にエラーが発生しました。");
       } finally {
-        els.multiLoadButton.disabled = files.length === 0;
+        els.multiLoadButton.disabled = appState.selectedMultiFiles.length === 0;
       }
-    });
-
-    els.selectBackToUploadButton.addEventListener("click", () => {
-      resetAll();
-    });
-
-    els.backToSelectButton.addEventListener("click", () => {
-      captureCurrentEdits();
-      renderSelectionScreen();
-      switchScreen("select");
-    });
-
-    els.resetButton.addEventListener("click", () => {
-      resetAll();
-    });
-
-    els.downloadButton.addEventListener("click", () => {
-      downloadEditedCsv();
-    });
-
-    function setUploadMode(mode) {
-      appState.uploadMode = mode;
-
-      const isMulti = mode === "multi";
-      els.singleUploadArea.classList.toggle("hidden", isMulti);
-      els.multiUploadArea.classList.toggle("hidden", !isMulti);
-
-      clearUploadMessages();
-      els.singleFileInput.value = "";
-      els.multiFileInput.value = "";
-      els.multiLoadButton.disabled = true;
-      els.multiSelectedCount.textContent = "CSVが選択されていません。";
     }
 
     async function parseCsvFile(file) {
@@ -1576,6 +1825,7 @@
     function resetAll() {
       resetCsvStateOnly();
 
+      appState.selectedMultiFiles = [];
       els.singleFileInput.value = "";
       els.multiFileInput.value = "";
       els.multiLoadButton.disabled = true;
