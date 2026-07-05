@@ -746,6 +746,34 @@
       padding: 0 22px 22px;
     }
 
+
+
+    .portal-button {
+      margin-left: auto;
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+      font-weight: 900;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 160ms ease, background-color 160ms ease;
+    }
+
+    .portal-button:hover {
+      background: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+
     @media (max-width: 960px) {
       .stats,
       .csv-card-grid {
@@ -756,6 +784,11 @@
     @media (max-width: 760px) {
       .hero {
         align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .portal-button {
+        margin-left: 0;
       }
 
       .brand-mark {
@@ -815,6 +848,7 @@
         <h1>波ダッシュバスター</h1>
         <p>半角「?」に化けた波ダッシュ候補を検出し、確認しながらCSVへ戻します。</p>
       </div>
+      <a class="portal-button" href="https://tsicb.github.io/job-csv-portal/" target="_blank" rel="noopener">求人CSVツール</a>
     </div>
   </header>
 
