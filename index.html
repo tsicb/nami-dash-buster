@@ -139,10 +139,32 @@
     }
 
     .upload-box {
-      border: 2px dashed #b6c2d5;
+      position: relative;
+      border: 1px solid #bfdbfe;
       border-radius: var(--radius);
       padding: 30px 20px;
-      background: #fff;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .settings-button {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--accent-dark);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+      font-weight: 800;
+    }
+
+    .settings-button:hover {
+      background: #eff6ff;
+      color: #1e40af;
     }
 
     .upload-box h2 {
@@ -164,28 +186,48 @@
     }
 
     .mode-switch {
+      --hex-cut: 22px;
       position: relative;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      width: min(100%, 360px);
-      padding: 4px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      border: 1px solid #d1d5db;
-      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
+      width: min(100%, 420px);
+      padding: 6px;
+      background: linear-gradient(135deg, #dbeafe 0%, #ffffff 46%, #eff6ff 100%);
+      border: 1px solid #93c5fd;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.92),
+        0 8px 20px rgba(37, 99, 235, 0.12);
+      clip-path: polygon(
+        var(--hex-cut) 0,
+        calc(100% - var(--hex-cut)) 0,
+        100% 50%,
+        calc(100% - var(--hex-cut)) 100%,
+        var(--hex-cut) 100%,
+        0 50%
+      );
+      overflow: hidden;
     }
 
     .mode-slider {
       position: absolute;
-      top: 4px;
-      bottom: 4px;
-      left: 4px;
-      width: calc(50% - 4px);
-      border-radius: 999px;
-      background: #fff;
-      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+      top: 6px;
+      bottom: 6px;
+      left: 6px;
+      width: calc(50% - 6px);
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 52%, #38bdf8 100%);
+      box-shadow:
+        0 8px 18px rgba(29, 78, 216, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      clip-path: polygon(
+        var(--hex-cut) 0,
+        calc(100% - var(--hex-cut)) 0,
+        100% 50%,
+        calc(100% - var(--hex-cut)) 100%,
+        var(--hex-cut) 100%,
+        0 50%
+      );
       transform: translateX(0);
-      transition: transform 220ms ease;
+      transition: transform 240ms ease;
       z-index: 1;
     }
 
@@ -198,21 +240,25 @@
       z-index: 2;
       border: none;
       background: transparent;
-      color: #4b5563;
-      border-radius: 999px;
-      padding: 10px 12px;
+      color: #1d4ed8;
+      padding: 14px 16px;
       font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.02em;
       cursor: pointer;
-      transition: color 180ms ease;
+      transition:
+        color 180ms ease,
+        transform 180ms ease;
     }
 
     .mode-option:hover {
       background: transparent;
-      color: #111827;
+      color: #0f3fb8;
+      transform: translateY(-1px);
     }
 
     .mode-option.active {
-      color: var(--accent-dark);
+      color: #ffffff;
     }
 
     .upload-area {
@@ -563,6 +609,130 @@
       padding: 2px 5px;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.58);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(100%, 760px);
+      max-height: min(86vh, 820px);
+      overflow: auto;
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
+    }
+
+    .modal-header {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 22px 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border-bottom: 1px solid #dbeafe;
+    }
+
+    .modal-title {
+      margin: 0;
+      color: #1e3a8a;
+      font-size: 22px;
+      line-height: 1.35;
+    }
+
+    .modal-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .modal-close-icon {
+      flex: 0 0 auto;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #1e40af;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .modal-close-icon:hover {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .modal-body {
+      padding: 18px 22px 22px;
+    }
+
+    .help-section {
+      padding: 14px 0;
+      border-bottom: 1px solid #eef2ff;
+    }
+
+    .help-section:last-child {
+      border-bottom: none;
+    }
+
+    .help-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px;
+      color: #1e3a8a;
+      font-size: 16px;
+    }
+
+    .help-section p {
+      margin: 0;
+      color: #374151;
+    }
+
+    .help-list {
+      margin: 8px 0 0;
+      padding-left: 1.25em;
+      color: #374151;
+    }
+
+    .help-list li {
+      margin: 5px 0;
+    }
+
+    .help-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: #1e40af;
+      font-size: 13px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 22px 22px;
+    }
+
     @media (max-width: 960px) {
       .stats,
       .csv-card-grid {
@@ -593,6 +763,11 @@
     }
 
     @media (max-width: 480px) {
+      .settings-button {
+        position: static;
+        margin: 0 auto 16px;
+      }
+
       .hero {
         gap: 12px;
       }
@@ -608,6 +783,11 @@
 
       .mode-switch {
         width: 100%;
+        --hex-cut: 16px;
+      }
+
+      .mode-option {
+        padding: 12px 10px;
       }
     }
   </style>
@@ -629,6 +809,9 @@
     <!-- 1. Upload screen -->
     <section id="uploadScreen" class="screen active">
       <div class="panel upload-box">
+        <button type="button" id="settingsHelpButton" class="settings-button" aria-haspopup="dialog" aria-controls="helpModal">
+          ⚙ 使い方
+        </button>
         <h2>CSVファイルをアップロード</h2>
         <p>UTF-8 / Shift-JIS のCSVに対応しています。処理はブラウザ内だけで行います。</p>
 
@@ -778,6 +961,61 @@
     </section>
   </main>
 
+  <div id="helpModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle" aria-hidden="true">
+    <div class="modal-card" role="document">
+      <div class="modal-header">
+        <div>
+          <h2 id="helpModalTitle" class="modal-title">波ダッシュバスターの使い方</h2>
+          <p class="modal-subtitle">CSV内の半角「?」を確認しながら修正するための初心者向けガイドです。</p>
+        </div>
+        <button type="button" id="helpModalCloseIcon" class="modal-close-icon" aria-label="使い方を閉じる">×</button>
+      </div>
+
+      <div class="modal-body">
+        <section class="help-section">
+          <h3>1. このツールでできること</h3>
+          <p>CSV内で「～」が半角「?」に文字化けしている可能性がある箇所を探し、確認しながら修正できます。</p>
+        </section>
+
+        <section class="help-section">
+          <h3>2. CSVの読み込み</h3>
+          <ul class="help-list">
+            <li><strong>個別CSV：</strong>1つのCSVを確認します。ファイル選択またはドラッグ＆ドロップで読み込めます。</li>
+            <li><strong>複数CSV：</strong>複数CSVをまとめて読み込み、検出があったCSVだけを順番に確認できます。</li>
+          </ul>
+        </section>
+
+        <section class="help-section">
+          <h3>3. 検出されるパターン</h3>
+          <ul class="help-list">
+            <li><strong>?＋数字：</strong>例）<code>?1</code>、<code>?３</code>。初期値では <code>?</code> を <code>～</code> に置換します。</li>
+            <li><strong>円・日・月＋?：</strong>例）<code>円?</code>、<code>日?</code>、<code>月?</code>。初期値では <code>?</code> を <code>～</code> に置換します。</li>
+            <li><strong>その他の?：</strong>上記以外の半角 <code>?</code>。初期値では置換しません。</li>
+          </ul>
+        </section>
+
+        <section class="help-section">
+          <h3>4. 編集方法</h3>
+          <p>検出された各箇所には、元の抜き出し文字列と編集欄が表示されます。編集欄の内容が、そのまま出力CSVへ反映されます。</p>
+          <div class="help-note">判断しにくい場合は、編集欄の文字をそのまま残せば、元のCSVに近い状態で出力できます。</div>
+        </section>
+
+        <section class="help-section">
+          <h3>5. 出力CSV</h3>
+          <ul class="help-list">
+            <li>入力がShift-JISの場合は、Shift-JISで出力します。</li>
+            <li>入力がUTF-8の場合は、UTF-8 with BOMで出力します。</li>
+            <li>元の列順と、加工対象外の列は保持します。</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="helpModalCloseButton">閉じる</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const CONTEXT_WIDTH = 10;
 
@@ -898,7 +1136,12 @@
       otherList: document.getElementById("otherList"),
 
       downloadEncodingText: document.getElementById("downloadEncodingText"),
-      downloadButton: document.getElementById("downloadButton")
+      downloadButton: document.getElementById("downloadButton"),
+
+      settingsHelpButton: document.getElementById("settingsHelpButton"),
+      helpModal: document.getElementById("helpModal"),
+      helpModalCloseIcon: document.getElementById("helpModalCloseIcon"),
+      helpModalCloseButton: document.getElementById("helpModalCloseButton")
     };
 
     document.querySelectorAll("[data-mode-button]").forEach((button) => {
@@ -948,6 +1191,30 @@
       downloadEditedCsv();
     });
 
+    els.settingsHelpButton.addEventListener("click", () => {
+      openHelpModal();
+    });
+
+    els.helpModalCloseIcon.addEventListener("click", () => {
+      closeHelpModal();
+    });
+
+    els.helpModalCloseButton.addEventListener("click", () => {
+      closeHelpModal();
+    });
+
+    els.helpModal.addEventListener("click", (event) => {
+      if (event.target === els.helpModal) {
+        closeHelpModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && els.helpModal.classList.contains("active")) {
+        closeHelpModal();
+      }
+    });
+
     setupDropZone(els.singleDropZone, async (files) => {
       const file = files[0];
       if (!file) return;
@@ -963,6 +1230,20 @@
       setSelectedMultiFiles(files);
       setUploadStatus(`${files.length}件のCSVがドロップされました。「選択したCSVを読み込む」を押してください。`);
     });
+
+    function openHelpModal() {
+      els.helpModal.classList.add("active");
+      els.helpModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      els.helpModalCloseIcon.focus();
+    }
+
+    function closeHelpModal() {
+      els.helpModal.classList.remove("active");
+      els.helpModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      els.settingsHelpButton.focus();
+    }
 
     function setupDropZone(zone, onDropFiles) {
       zone.addEventListener("dragenter", (event) => {
